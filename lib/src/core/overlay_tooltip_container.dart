@@ -27,7 +27,6 @@ abstract class OverlayTooltipScaffoldImpl extends StatefulWidget {
 
 class OverlayTooltipScaffoldImplState
     extends State<OverlayTooltipScaffoldImpl> {
-
   void addPlayableWidget(OverlayTooltipModel model) {
     widget.controller.addPlayableWidget(model);
   }
@@ -84,43 +83,50 @@ class _TooltipLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var topLeft = model.widgetKey.globalPaintBounds!.topLeft;
-    var bottomRight = model.widgetKey.globalPaintBounds!.bottomRight;
+    final renderBox =
+        model.widgetKey.currentContext?.findRenderObject() as RenderBox;
+    var topLeft = model.widgetKey.globalPaintBounds?.topLeft;
+    topLeft ??= renderBox.paintBounds.topLeft;
+
+    var bottomRight = model.widgetKey.globalPaintBounds?.bottomRight;
+    bottomRight ??= renderBox.paintBounds.bottomRight;
 
     return LayoutBuilder(builder: (context, size) {
-      if (topLeft.dx < 0) {
-        bottomRight = Offset(bottomRight.dx + (0 - topLeft.dx), bottomRight.dy);
-        topLeft = Offset(0, topLeft.dy);
+      if (topLeft!.dx < 0) {
+        bottomRight =
+            Offset(bottomRight!.dx + (0 - topLeft!.dx), bottomRight!.dy);
+        topLeft = Offset(0, topLeft!.dy);
       }
 
-      if (bottomRight.dx > size.maxWidth) {
-        topLeft =
-            Offset(topLeft.dx - (bottomRight.dx - size.maxWidth), topLeft.dy);
-        bottomRight = Offset(size.maxWidth, bottomRight.dy);
+      if (bottomRight!.dx > size.maxWidth) {
+        topLeft = Offset(
+            topLeft!.dx - (bottomRight!.dx - size.maxWidth), topLeft!.dy);
+        bottomRight = Offset(size.maxWidth, bottomRight!.dy);
       }
 
-      if (topLeft.dy < 0) {
-        bottomRight = Offset(bottomRight.dx, bottomRight.dy + (0 - topLeft.dy));
-        topLeft = Offset(topLeft.dx, 0);
+      if (topLeft!.dy < 0) {
+        bottomRight =
+            Offset(bottomRight!.dx, bottomRight!.dy + (0 - topLeft!.dy));
+        topLeft = Offset(topLeft!.dx, 0);
       }
 
-      if (bottomRight.dy > size.maxHeight) {
-        topLeft =
-            Offset(topLeft.dx, topLeft.dy - (bottomRight.dy - size.maxHeight));
-        bottomRight = Offset(bottomRight.dx, size.maxHeight);
+      if (bottomRight!.dy > size.maxHeight) {
+        topLeft = Offset(
+            topLeft!.dx, topLeft!.dy - (bottomRight!.dy - size.maxHeight));
+        bottomRight = Offset(bottomRight!.dx, size.maxHeight);
       }
 
       return Stack(
         fit: StackFit.expand,
         children: [
           Positioned(
-            top: topLeft.dy,
-            left: topLeft.dx,
-            bottom: size.maxHeight - bottomRight.dy,
-            right: size.maxWidth - bottomRight.dx,
+            top: topLeft!.dy,
+            left: topLeft!.dx,
+            bottom: size.maxHeight - bottomRight!.dy,
+            right: size.maxWidth - bottomRight!.dx,
             child: IgnorePointer(child: model.child),
           ),
-          _buildBottomToolTip(topLeft, bottomRight, size)
+          _buildBottomToolTip(topLeft!, bottomRight!, size)
         ],
       );
     });
